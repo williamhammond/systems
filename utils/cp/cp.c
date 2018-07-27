@@ -8,7 +8,7 @@ const int BUFFER_SIZE = 1024;
 
 int
 main(int argc, char *argv[]) {
-    int srcd, destd, count;
+    int srcd, destd, count, holCnt;
     char buf[BUFFER_SIZE];
 
     if (argc != 2) {
@@ -30,8 +30,21 @@ main(int argc, char *argv[]) {
         printf("open\n"); 
         exit(EXIT_FAILURE);
     }
+    holCnt = 0;
     while ((count = read(srcd, buf, sizeof(BUFFER_SIZE))) > 0) {
-        write(destd, buf, count); 
+        for (int i = 0; i < count; i++) {
+            if (buf[i] == '\0') {
+                holCnt++;     
+            } else if (holCnt > 0) {
+                lseek(destd, holCnt, SEEK_CUR); 
+                write(destd, &buf[i], 1);
+                holCnt = 0;
+            } else {
+                write(destd, &buf[i], 1); 
+            }
+        }
     }
+    close(srcd);
+    close(destd);
     exit(EXIT_SUCCESS);
 }
