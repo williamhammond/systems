@@ -4,10 +4,12 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+const int BUFFER_SIZE = 1024;
+
 int
 main(int argc, char *argv[]) {
-    int srcd, destd;
-    char ch;
+    int srcd, destd, count;
+    char buf[BUFFER_SIZE];
 
     if (argc != 2) {
         fprintf(stderr, "Usage: %s SRC_FILE DEST_FILE\n", argv[0]);
@@ -28,8 +30,8 @@ main(int argc, char *argv[]) {
         printf("open\n"); 
         exit(EXIT_FAILURE);
     }
-    while (read(srcd, &ch, 1) > 0) {
-        write(destd, &ch, 1); 
+    while ((count = read(srcd, buf, sizeof(BUFFER_SIZE))) > 0) {
+        write(destd, buf, count); 
     }
     exit(EXIT_SUCCESS);
 }
