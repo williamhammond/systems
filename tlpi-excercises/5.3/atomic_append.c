@@ -25,11 +25,11 @@ main(int argc, char *argv[]) {
                 printf("lseek\n"); 
                 exit(EXIT_FAILURE);
 			}
+        }
         	if (write(fd, "x", 1) != 1) {
                 printf("write\n"); 
                 exit(EXIT_FAILURE);
 			}
-		}	
 	}
     exit(EXIT_SUCCESS);
 }
