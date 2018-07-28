@@ -19,7 +19,6 @@ main(int argc, char *argv[]) {
         printf("open\n"); 
         exit(EXIT_FAILURE);
     }
-    char c = 'a';
     for (int i = 0; i < numbytes; i++) {
         if (useLseek) {
             if (lseek(fd, 0, SEEK_END) == -1){
