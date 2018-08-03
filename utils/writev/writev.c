@@ -5,6 +5,8 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
 
 ssize_t 
@@ -23,25 +25,35 @@ writev(int fd, const struct iovec *iov, int iovcnt) {
         memcpy(ptr, iov[i].iov_base, iov[i].iov_len);
     }
     ret = write(fd, ptr, bufsize);
+    if (ret == -1) {
+        printf("write: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    free(ptr);
 
     return ret;
 }
 
 int 
 main(int argc, char *argv[]) {
-    int fd, flags, iovcnt, x;    
+    int fd, flags, iovcnt;    
+    char x;
     struct iovec iov[1];
     ssize_t ret; 
 
-    x = 1;
+    x = 'a';
     iov[0].iov_base = &x;
     iov[0].iov_len = sizeof(x);
 
     flags = O_CREAT | O_EXCL | O_RDWR;
     fd = open(argv[1], flags);
+    if (fd == -1) {
+        printf("read: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     ret = writev(fd, iov, 1);
-    printf("bytes written %zu", ret);
+    printf("bytes written %zd", ret);
 
     exit(EXIT_SUCCESS);
 } 
