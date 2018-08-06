@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/uio.h>
@@ -17,7 +18,7 @@ readv(int fd, const struct iovec *iov, int iovcnt) {
     }
 
     buffer = (char *) malloc(bufsize);
-    if buffer == NULL {
+    if (buffer == NULL) {
         return -1; 
     }
 
