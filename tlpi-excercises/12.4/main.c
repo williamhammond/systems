@@ -4,6 +4,7 @@
 #include <string.h>
 #include <pwd.h>
 #include <dirent.h>
+#include <ctype.h>
 
 uid_t
 userIdFromName(const char *name) {
@@ -30,6 +31,30 @@ userIdFromName(const char *name) {
     return pwd->pw_uid;
 }
 
+void print_name(long pid) {
+    char path[40], line[100], *p;
+    FILE* statusf;
+
+    snprintf(path, 40, "/proc/%ld/status", pid);
+
+    statusf = fopen(path, "r");
+    if (!statusf) {
+        return;
+    }
+    while(fgets(line, 100, statusf)) {
+        if(strncmp(line, "Name:", 4) != 0){
+            continue;
+        }
+        // Ignore "Name:" and whitespace
+        p = line + 7;
+        while(isspace(*p)) ++p;
+
+        printf("%4ld %s\n",pid ,p);
+        break;
+    }
+    fclose(statusf);
+}
+
 /**
  * Write a program that lists the process ID and command name for all
  * processes being run by the user named in the program's command-line
@@ -42,11 +67,12 @@ main(int argc, char *argv[]) {
     uid_t id;
     struct dirent *dp;
     DIR *dirp;
-    int isCurrent;
+    long pid;
     if (argc != 2) {
         printf("USAGE: main username\n"); 
         exit(EXIT_FAILURE);
     } 
+
     id = userIdFromName(argv[1]);
     dirp = opendir("/proc");
     if (dirp == NULL) {
@@ -54,13 +80,11 @@ main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     while ((dp = readdir(dirp)) != NULL) {
-        if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) {
-            continue; 
+        if (!isdigit(*dp->d_name)) {
+            continue;
         }
-        if (dp->d_type == DT_DIR) {
-            printf("%s\n", dp->d_name);
-        }
-
+        pid = strtol(dp->d_name, NULL, 10);
+        print_name(pid);
     }
     if (errno != 0) {
         fprintf(stderr, "error reading file %s\n", strerror(errno));
